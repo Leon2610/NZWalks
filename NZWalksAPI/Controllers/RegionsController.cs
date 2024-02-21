@@ -109,5 +109,30 @@ namespace NZWalksAPI.Controllers
 
             return Ok(regionDTO);
         }
+
+        [HttpDelete]
+        [Route("{id:Guid}")]
+        public IActionResult Delete([FromRoute] Guid id)
+        {
+            var regionDomailModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+
+            if (regionDomailModel == null)
+            {
+                return NotFound();
+            }
+
+            dbContext.Regions.Remove(regionDomailModel);
+            dbContext.SaveChanges();
+
+            var regionDTO = new RegionDTO()
+            {
+                Id = regionDomailModel.Id,
+                Code = regionDomailModel.Code,
+                Name = regionDomailModel.Name,
+                RegionImageUrl = regionDomailModel.RegionImageUrl
+            };
+
+            return Ok(regionDTO);
+        }
     }
 }
