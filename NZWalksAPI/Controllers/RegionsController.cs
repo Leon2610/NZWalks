@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NZWalksAPI.Data;
 using NZWalksAPI.Models.Domain;
+using NZWalksAPI.Models.DTO;
 
 namespace NZWalksAPI.Controllers
 {
@@ -19,7 +20,20 @@ namespace NZWalksAPI.Controllers
         public IActionResult GetAll()
         {
             var regions = dbContext.Regions.ToList();
-            return Ok(regions);
+
+            var regionsDTO = new List<RegionDTO>();
+            foreach (var region in regions)
+            {
+                regionsDTO.Add(new RegionDTO
+                {
+                    Id = region.Id,
+                    Code = region.Code,
+                    Name = region.Name,
+                    RegionImageUrl = region.RegionImageUrl
+                });
+            }
+
+            return Ok(regionsDTO);
         }
 
         [HttpGet]
@@ -27,11 +41,21 @@ namespace NZWalksAPI.Controllers
         public IActionResult GetById([FromRoute]Guid id)
         {
             var region = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+
             if (region == null)
             {
                 return NotFound();
             }
-            return Ok(region);
+
+            var regionDTO = new RegionDTO()
+            {
+                Id = region.Id,
+                Code = region.Code,
+                Name = region.Name,
+                RegionImageUrl = region.RegionImageUrl
+            };
+
+            return Ok(regionDTO);
         }
     }
 }
