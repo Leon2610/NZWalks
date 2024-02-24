@@ -48,31 +48,41 @@ namespace NZWalksAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDTO addRegionRequestDTO)
         {
-            var regionDomainModel = mapper.Map<Region>(addRegionRequestDTO);
+            if (ModelState.IsValid) 
+            {
+                var regionDomainModel = mapper.Map<Region>(addRegionRequestDTO);
 
-            regionDomainModel = await regionRepository.Create(regionDomainModel);
+                regionDomainModel = await regionRepository.Create(regionDomainModel);
 
-            var regionDTO = mapper.Map<RegionDTO>(regionDomainModel);
+                var regionDTO = mapper.Map<RegionDTO>(regionDomainModel);
 
-            return CreatedAtAction(nameof(GetById), new { id = regionDomainModel.Id }, regionDTO);
+                return CreatedAtAction(nameof(GetById), new { id = regionDomainModel.Id }, regionDTO);
+            }
+
+            return BadRequest(ModelState);
         }
 
         [HttpPut]
         [Route("{id:Guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDTO updateRegionRequestDTO)
         {
-            var regionDomainModel = mapper.Map<Region>(updateRegionRequestDTO);
-
-            regionDomainModel = await regionRepository.Update(id, regionDomainModel);
-
-            if (regionDomainModel == null)
+            if (ModelState.IsValid)
             {
-                return NotFound();
+                var regionDomainModel = mapper.Map<Region>(updateRegionRequestDTO);
+
+                regionDomainModel = await regionRepository.Update(id, regionDomainModel);
+
+                if (regionDomainModel == null)
+                {
+                    return NotFound();
+                }
+
+                var regionDTO = mapper.Map<RegionDTO>(regionDomainModel);
+
+                return Ok(regionDTO);
             }
 
-            var regionDTO = mapper.Map<RegionDTO>(regionDomainModel);
-
-            return Ok(regionDTO);
+            return BadRequest(ModelState);
         }
 
         [HttpDelete]
