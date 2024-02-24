@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NZWalksAPI.CustomActionFilters;
 using NZWalksAPI.Models.Domain;
 using NZWalksAPI.Models.DTO;
 using NZWalksAPI.Repositories;
@@ -21,20 +21,16 @@ namespace NZWalksAPI.Controllers
         }
 
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> Create([FromBody] AddWalkRequestDTO addWalkRequestDTO)
         {
-            if (ModelState.IsValid)
-            {
-                var walkDomainModel = mapper.Map<Walk>(addWalkRequestDTO);
+            var walkDomainModel = mapper.Map<Walk>(addWalkRequestDTO);
 
-                await walkRepository.CreateAsync(walkDomainModel);
+            await walkRepository.CreateAsync(walkDomainModel);
 
-                var walkDTO = mapper.Map<WalkDTO>(walkDomainModel);
+            var walkDTO = mapper.Map<WalkDTO>(walkDomainModel);
 
-                return Ok(walkDTO);
-            }
-
-            return BadRequest(ModelState);
+            return Ok(walkDTO);
         }
 
         [HttpGet]
@@ -65,24 +61,20 @@ namespace NZWalksAPI.Controllers
 
         [HttpPut]
         [Route("{id:Guid}")]
+        [ValidateModel]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateWalkRequestDTO updateWalkRequestDTO)
         {
-            if (ModelState.IsValid)
+            var walk = mapper.Map<Walk>(updateWalkRequestDTO);
+
+            walk = await walkRepository.UpdateAsync(id, walk);
+
+            if (walk == null)
             {
-                var walk = mapper.Map<Walk>(updateWalkRequestDTO);
-
-                walk = await walkRepository.UpdateAsync(id, walk);
-
-                if (walk == null)
-                {
-                    return NotFound();
-                }
-
-                var walkDTO = mapper.Map<WalkDTO>(walk);
-                return Ok(walkDTO);
+                return NotFound();
             }
 
-            return BadRequest(ModelState);
+            var walkDTO = mapper.Map<WalkDTO>(walk);
+            return Ok(walkDTO);
         }
 
         [HttpDelete]
