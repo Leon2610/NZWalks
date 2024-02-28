@@ -25,7 +25,7 @@ namespace NZWalksAPI.Controllers
         }
 
         [HttpGet]
-        //[Authorize(Roles = "Reader")]
+        [Authorize(Roles = "Reader")]
         public async Task<IActionResult> GetAll()
         {
             logger.LogInformation("Getting all regions");
@@ -33,7 +33,6 @@ namespace NZWalksAPI.Controllers
             var regionsDomain = await regionRepository.GetAll();
 
             logger.LogInformation($"Finieshed GetAllRegions request with data: {JsonSerializer.Serialize(regionsDomain)}");
-
 
             var regionsDTO = mapper.Map<List<RegionDTO>>(regionsDomain);
 
