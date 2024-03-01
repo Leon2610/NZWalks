@@ -77,7 +77,7 @@ namespace NZWalks.UI.Controllers
         {
             var client = httpClientFactory.CreateClient();
 
-            var response = await client.GetFromJsonAsync<RegionDTO>($"https://localhost:7163/api/regions/{id.ToString()}");
+            var response = await client.GetFromJsonAsync<RegionDTO>($"https://localhost:7163/api/regions/{id}");
 
             if (response != null)
             {
@@ -85,6 +85,32 @@ namespace NZWalks.UI.Controllers
             }
 
             return View(null);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(RegionDTO request)
+        {
+            var client = httpClientFactory.CreateClient();
+
+            var httpRequestMessage = new HttpRequestMessage()
+            {
+                Method = HttpMethod.Put,
+                RequestUri = new Uri($"https://localhost:7163/api/regions/{request.Id}"),
+                Content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
+            };
+
+            var httpResponseMessage = await client.SendAsync(httpRequestMessage);
+
+            httpResponseMessage.EnsureSuccessStatusCode();
+
+            var response = await httpResponseMessage.Content.ReadFromJsonAsync<RegionDTO>();
+
+            if (response != null)
+            {
+                return RedirectToAction("Index", "Regions");
+            }
+
+            return View();
         }
     }
 }
